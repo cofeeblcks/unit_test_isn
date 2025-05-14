@@ -1,4 +1,4 @@
-# **Eliel Tarazona - Hadik Chavez**
+# **Eliel Tarazona - Hadik Chavez - Maria Camila Rodriguez**
 ---
 ## UnitTestIsn
 ---
@@ -51,22 +51,11 @@ npm install --save-dev jest jest-preset-angular @types/jest @angular-builders/je
 ```
 module.exports = {
   preset: 'jest-preset-angular',
-  setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/dist/'],
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-    },
-  },
 };
 ```
 
-4. Crear setup-jest.ts
-```
-import 'jest-preset-angular/setup-jest';
-```
-
-5. Modificar angular.json
+4. Modificar angular.json
 ```
 "test": {
   "builder": "@angular-builders/jest:run",
@@ -76,7 +65,7 @@ import 'jest-preset-angular/setup-jest';
 }
 ```
 
-6. Actualizar tsconfig.spec.json
+5. Actualizar tsconfig.spec.json
 ```
 {
   "extends": "./tsconfig.json",
@@ -157,4 +146,74 @@ expect(component.lista).toEqual([1, 2, 3]);
 - Excepciones:
 ```
 expect(() => component.metodoRoto()).toThrowError('Error esperado');
+```
+
+### **6. Pruebas Autenticación**
+
+- Creación de componente
+```
+ng g c Auth
+```
+
+- Contenido de la prueba, en auth.component.spec.ts
+```
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { AuthComponent } from './auth.component';
+
+describe('AuthComponent', () => {
+  let component: AuthComponent;
+  let fixture: ComponentFixture<AuthComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AuthComponent]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(AuthComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  // Prueba 1: Login exitoso con credenciales correctas
+  it('debería autenticar al usuario si las credenciales son "admin/admin"', () => {
+    component.login('admin', 'admin');
+    fixture.detectChanges();
+
+    expect(component.isAuthenticated).toBe(true);
+    expect(component.username).toBe('admin');
+    expect(component.errorMessage).toBe('');
+
+    // Verificar que se muestre el mensaje de bienvenida en el DOM
+    const welcomeMessage = fixture.debugElement.query(By.css('p'));
+    expect(welcomeMessage.nativeElement.textContent).toContain('¡Bienvenido, admin!');
+  });
+
+  // Prueba 2: Login fallido con credenciales incorrectas
+  it('debería mostrar error si las credenciales son incorrectas', () => {
+    component.login('user', '123');
+    fixture.detectChanges();
+
+    expect(component.isAuthenticated).toBe(false);
+    expect(component.errorMessage).toBe('Credenciales incorrectas');
+
+    // Verificar que se muestre el mensaje de error en el DOM
+    const errorMessage = fixture.debugElement.query(By.css('.error'));
+    expect(errorMessage.nativeElement.textContent).toContain('Credenciales incorrectas');
+  });
+
+  // Prueba 3: Campos vacíos no deben autenticar
+  it('debería rechazar credenciales vacías', () => {
+    component.login('', '');
+    fixture.detectChanges();
+
+    expect(component.isAuthenticated).toBe(false);
+    expect(component.errorMessage).toBe('Credenciales incorrectas');
+  });
+});
 ```

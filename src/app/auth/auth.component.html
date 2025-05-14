@@ -1,0 +1,5 @@
+<input #usernameInput placeholder="Username" />
+<input #passwordInput type="password" placeholder="Password" />
+<button (click)="login(usernameInput.value, passwordInput.value)">Login</button>
+<p ngIf="isAuthenticated">¡Bienvenido, {{ username }}!</p>
+<p ngIf="errorMessage" class="error">{{ errorMessage }}</p>
